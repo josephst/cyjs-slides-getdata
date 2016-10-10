@@ -1,0 +1,17 @@
+{
+  "name": "get-twitter-data-for-slides",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "dependencies": {
+    "lodash": "^4.16.4",
+    "moment": "^2.15.1",
+    "twit": "^2.2.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
