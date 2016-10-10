@@ -4,9 +4,7 @@
   "description": "",
   "main": "main.js",
   "dependencies": {
-    "lodash": "^4.16.4",
-    "moment": "^2.15.1",
-    "twit": "^2.2.5"
+    "lodash": "^4.16.4"
   },
   "devDependencies": {},
   "scripts": {

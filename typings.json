@@ -2,8 +2,6 @@
   "dependencies": {},
   "globalDependencies": {
     "lodash": "registry:dt/lodash#4.14.0+20161004174455",
-    "moment": "registry:dt/moment#2.11.1+20160829143156",
-    "node": "registry:dt/node#6.0.0+20161008175459",
-    "twit": "registry:dt/twit#2.2.0+20160805080445"
+    "node": "registry:dt/node#6.0.0+20161008175459"
   }
 }
