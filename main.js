@@ -15,8 +15,13 @@ function generateNodes(count) {
       let randomFactor = _.random(1, 3);
       return _.range(DAYSTOFILL, 0, -1).map(val => val * randomFactor);
     },
-    genConstantArr: function() {
-      return _.fill(Array(DAYSTOFILL), _.random(10, 20));
+    genOscillatingArr: function() {
+      let result = [];
+      let basis = _.random(10, 20);
+      let randomFactor = _.random(1, 3);
+      for (let i = 0; i < DAYSTOFILL; i++) {
+        result.push(Math.sin(Math.PI * i / 2) * randomFactor + basis);
+      }
     }
   }
   let randomGrowthStrategy = function() {
