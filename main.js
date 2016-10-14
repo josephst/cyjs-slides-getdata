@@ -18,7 +18,7 @@ function generateNodes(count) {
     /**
      * Return an array of increasing integers from 1 to DAYSTOFILL + 1 with some random growth factor
      * 
-     * @return Increasing array
+     * @return {Array} Increasing array
      */
     genGrowingArr: function() {
       let randomFactor = _.random(1, 3);
@@ -28,26 +28,36 @@ function generateNodes(count) {
     /**
      * Return an array of decreasing integers from 1 to DAYSTOFILL + 1 with some random growth factor
      * 
-     * @return Decreasing array
+     * @return {Array} Decreasing array
      */
     genDiminishingArr: function() {
       let randomFactor = _.random(1, 3);
       return _.range(DAYSTOFILL, 0, -1).map(val => val * randomFactor);
     },
+
+    /**
+     * Return an array of oscillating integers.
+     * This is done by calling Math.sin on pi/2, pi, 3pi/2, 2pi so that values go from 1, 0, -1, 0.
+     * The result is then multiplied by a predetermined random number between 1 and 3 and added to the basis,
+     * so that all numbers are between (basis +- randomFactor).
+     * 
+     * @return {Array} Oscillating array
+     */
     genOscillatingArr: function() {
       let result = [];
       let basis = _.random(10, 20);
       let randomFactor = _.random(1, 3);
       for (let i = 0; i < DAYSTOFILL; i++) {
-        result.push(Math.sin(Math.PI * i / 2) * randomFactor + basis);
+        result.push(Math.round(Math.sin(Math.PI * i / 2) * randomFactor + basis));
       }
+      return result;
     }
   }
 
   /**
    * Choose a random growth strategy from the growthStrategies object
    * 
-   * @return A randomly selected function which will generate an array when called
+   * @return {Function} A randomly selected function which will generate an array when called
    */
   let randomGrowthStrategy = function() {
     let strategies = _.keys(growthStrategies);
@@ -56,10 +66,12 @@ function generateNodes(count) {
   let nodes = [];
   _.range(0, count).forEach(val => {
     let strategy = randomGrowthStrategy();
+    let postsArr = strategy();
     nodes.push({
       data: {
         id: val,
-        postsByDay: strategy(),
+        postsByDay: postsArr,
+        totalPosts: postsArr.reduce((prev, cur) => prev + cur),
         peopleFollowedCount: _.random(1, Math.floor(count/2))
       }
     });
