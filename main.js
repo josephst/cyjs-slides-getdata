@@ -118,7 +118,7 @@ function generateEdges(nodes) {
 
   nodes.forEach(node => {
     // in special case of the "crossing over" node, only make 2 edges to ensure good karger-stein result
-    let edgesToMake = (node.data.id === crossingOverId) ? 2 : node.data.peopleFollowedCount;
+    let edgesToMake = (node.data.id === crossingOverId) ? 4 : node.data.peopleFollowedCount;
     let possibleTargets = _.filter(nodes, target => {
       if (node.data.id === crossingOverId) {
         // we can cross between groups (return all possible ids)
