@@ -1,9 +1,12 @@
 let _ = require('lodash');
 let fs = require('fs');
+const Datauri = require('datauri').sync;
 
 let NODECOUNT = 25;
 let DAYSTOFILL = 30;
-let EDGEFACTOR = 3;
+let MAX_EDGE_FACTOR = 3; // number of edges from each node will be no greater than (NODECOUNT / MAX_EDGE_FACTOR)
+let MIN_EDGE_FACTOR = 12; // number of edges from each node will be no less than (NODECOUNT / MIN_EDGE_FACTOR)
+let SAME_GROUP_PROB = 0.9; // probability that an even ID node will only have edges to other even ID nodes
 
 /**
  * Returns an array of nodes in Cytoscape.js format.
@@ -72,7 +75,9 @@ function generateNodes(count) {
         id: val,
         postsByDay: postsArr,
         totalPosts: postsArr.reduce((prev, cur) => prev + cur),
-        peopleFollowedCount: _.random(1, Math.floor(count/2))
+        peopleFollowedCount: _.random(Math.floor(count / MIN_EDGE_FACTOR), Math.floor(count / MAX_EDGE_FACTOR)),
+        // peopleFollowedCount: _.random(1, Math.floor(count / MAX_EDGE_FACTOR)),
+        image: Datauri('images/' + val + '.jpg')
       }
     });
   })
@@ -111,8 +116,16 @@ function generateEdges(nodes) {
 
   nodes.forEach(node => {
     let edgesToMake = node.data.peopleFollowedCount;
+    let rand = Math.random();
     let possibleTargets = _.filter(nodes, target => {
-      return target.data.id != node.data.id; 
+      if (rand >= SAME_GROUP_PROB) {
+        // we can cross between groups (return all possible ids)
+        return target.data.id != node.data.id; 
+      }
+      // otherwise, stay within group (even IDs only make edges to other even IDs)
+      // (even + even) % 2 == 0 and (odd + odd) % 2 == 0
+      return (target.data.id != node.data.id) &&
+        ((target.data.id + node.data.id) % 2 == 0);     
     });
     let currentNodeEdges = [];
     for (let i = 0; i < node.data.peopleFollowedCount; i++) {
@@ -120,7 +133,7 @@ function generateEdges(nodes) {
       currentNodeEdges.push(generateEdge(edgeId++, node.data.id, target.data.id));
       // then remove this node from further consideration (don't want 2 edges from this node to target)
       _.remove(possibleTargets, possibleTarget => {
-        possibleTarget.data.id == target.data.id
+        return possibleTarget.data.id == target.data.id
       });
     }
     edges = edges.concat(currentNodeEdges);
@@ -143,4 +156,10 @@ function generateData(count) {
   }
 }
 
-fs.writeFile('output.json', JSON.stringify(generateData(NODECOUNT), null, 2));
+fs.writeFile('graph_data.js', 'let data = ' + JSON.stringify(generateData(NODECOUNT), null, 2), function(err) {
+  if (err) {
+    console.log(err);
+    process.exit(-1);
+  }
+  process.exit(0);
+});

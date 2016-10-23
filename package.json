@@ -4,6 +4,7 @@
   "description": "",
   "main": "main.js",
   "dependencies": {
+    "datauri": "^1.0.4",
     "lodash": "^4.16.4"
   },
   "devDependencies": {},
