@@ -77,7 +77,8 @@ function generateNodes(count) {
         peopleFollowedCount: _.random(Math.floor(count / MIN_EDGE_FACTOR), Math.floor(count / MAX_EDGE_FACTOR) - 1),
         // peopleFollowedCount: _.random(1, Math.floor(count / MAX_EDGE_FACTOR)),
         image: Datauri('images/' + val + '.jpg'),
-        degreeCentrality: 0
+        degreeCentrality: 0,
+        djikstraDistance: 0
       }
     });
   })
