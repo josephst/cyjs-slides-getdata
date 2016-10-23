@@ -5,8 +5,7 @@ const Datauri = require('datauri').sync;
 let NODECOUNT = 25;
 let DAYSTOFILL = 30;
 let MAX_EDGE_FACTOR = 3; // number of edges from each node will be no greater than (NODECOUNT / MAX_EDGE_FACTOR)
-let MIN_EDGE_FACTOR = 12; // number of edges from each node will be no less than (NODECOUNT / MIN_EDGE_FACTOR)
-let SAME_GROUP_PROB = 0.9; // probability that an even ID node will only have edges to other even ID nodes
+let MIN_EDGE_FACTOR = 6; // number of edges from each node will be no less than (NODECOUNT / MIN_EDGE_FACTOR)
 
 /**
  * Returns an array of nodes in Cytoscape.js format.
@@ -75,9 +74,10 @@ function generateNodes(count) {
         id: val,
         postsByDay: postsArr,
         totalPosts: postsArr.reduce((prev, cur) => prev + cur),
-        peopleFollowedCount: _.random(Math.floor(count / MIN_EDGE_FACTOR), Math.floor(count / MAX_EDGE_FACTOR)),
+        peopleFollowedCount: _.random(Math.floor(count / MIN_EDGE_FACTOR), Math.floor(count / MAX_EDGE_FACTOR) - 1),
         // peopleFollowedCount: _.random(1, Math.floor(count / MAX_EDGE_FACTOR)),
-        image: Datauri('images/' + val + '.jpg')
+        image: Datauri('images/' + val + '.jpg'),
+        degreeCentrality: 0
       }
     });
   })
@@ -96,6 +96,7 @@ function generateNodes(count) {
 function generateEdges(nodes) {
   let edgeId = 0;
   let edges = [];
+  let crossingOverId = _.random(0, nodes.length - 1);
 
   /** Simple generator for Cytoscape.js-formatted JSON objects
    * 
@@ -115,28 +116,27 @@ function generateEdges(nodes) {
   }
 
   nodes.forEach(node => {
-    let edgesToMake = node.data.peopleFollowedCount;
-    let rand = Math.random();
+    // in special case of the "crossing over" node, only make 2 edges to ensure good karger-stein result
+    let edgesToMake = (node.data.id === crossingOverId) ? 2 : node.data.peopleFollowedCount;
     let possibleTargets = _.filter(nodes, target => {
-      if (rand >= SAME_GROUP_PROB) {
+      if (node.data.id === crossingOverId) {
         // we can cross between groups (return all possible ids)
-        return target.data.id != node.data.id; 
+        return target.data.id != node.data.id;
       }
       // otherwise, stay within group (even IDs only make edges to other even IDs)
       // (even + even) % 2 == 0 and (odd + odd) % 2 == 0
       return (target.data.id != node.data.id) &&
         ((target.data.id + node.data.id) % 2 == 0);     
     });
-    let currentNodeEdges = [];
-    for (let i = 0; i < node.data.peopleFollowedCount; i++) {
+    for (let i = 0; i < edgesToMake; i++) {
+      console.log('making edge ' + i + ' out of ' + edgesToMake);
       let target = possibleTargets[_.random(possibleTargets.length - 1)];
-      currentNodeEdges.push(generateEdge(edgeId++, node.data.id, target.data.id));
+      edges.push(generateEdge(edgeId++, node.data.id, target.data.id));
       // then remove this node from further consideration (don't want 2 edges from this node to target)
       _.remove(possibleTargets, possibleTarget => {
         return possibleTarget.data.id == target.data.id
       });
     }
-    edges = edges.concat(currentNodeEdges);
   });
   return edges;
 }
